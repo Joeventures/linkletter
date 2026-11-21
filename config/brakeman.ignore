@@ -1,0 +1,62 @@
+{
+  "ignored_warnings": [
+    {
+      "warning_type": "Redirect",
+      "warning_code": 18,
+      "fingerprint": "597b9c8cc017c6c18e7eb2da22e8dcdef4ce5b0a965225a49b72fa7d5c5fb88a",
+      "check_name": "Redirect",
+      "message": "Possible unprotected redirect",
+      "file": "app/controllers/redirects_controller.rb",
+      "line": 25,
+      "link": "https://brakemanscanner.org/docs/warning_types/redirect/",
+      "code": "redirect_to(PersonalLink.includes(:link).find_by(:token => params[:token].to_s).link.url, :allow_other_host => true)",
+      "render_path": null,
+      "location": {
+        "type": "method",
+        "class": "RedirectsController",
+        "method": "show"
+      },
+      "user_input": "PersonalLink.includes(:link).find_by(:token => params[:token].to_s).link.url",
+      "confidence": "Weak",
+      "cwe_id": [
+        601
+      ],
+      "note": "Intentional: this is the tracked redirect. The target is never taken from the request; it is a Link#url looked up by an unguessable token, set only by the authenticated owner, and validated to be an absolute http(s) URL (Link#url_must_be_http, covered by test/models/link_test.rb)."
+    },
+    {
+      "warning_type": "Cross-Site Scripting",
+      "warning_code": 4,
+      "fingerprint": "809d55bf0d160469bfc59ad564e66c5da27d8132b334ad6c48863d57812ce2be",
+      "check_name": "LinkToHref",
+      "message": "Potentially unsafe model attribute in `link_to` href",
+      "file": "app/views/links/show.html.erb",
+      "line": 6,
+      "link": "https://brakemanscanner.org/docs/warning_types/link_to_href",
+      "code": "link_to(Current.user.groups.find(params[:group_id]).links.find(params[:id]).url, Current.user.groups.find(params[:group_id]).links.find(params[:id]).url, :target => \"_blank\", :rel => \"noopener noreferrer\")",
+      "render_path": [
+        {
+          "type": "controller",
+          "class": "LinksController",
+          "method": "show",
+          "line": 28,
+          "file": "app/controllers/links_controller.rb",
+          "rendered": {
+            "name": "links/show",
+            "file": "app/views/links/show.html.erb"
+          }
+        }
+      ],
+      "location": {
+        "type": "template",
+        "template": "links/show"
+      },
+      "user_input": "Current.user.groups.find(params[:group_id]).links.find(params[:id]).url",
+      "confidence": "Weak",
+      "cwe_id": [
+        79
+      ],
+      "note": "Safe: Link#url is validated to be an absolute http(s) URL, so javascript:/data: hrefs cannot be stored (Link#url_must_be_http, covered by test/models/link_test.rb)."
+    }
+  ],
+  "brakeman_version": "8.1.1"
+}
