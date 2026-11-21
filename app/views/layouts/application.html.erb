@@ -23,7 +23,23 @@
     <%= javascript_importmap_tags %>
   </head>
 
-  <body>
-    <%= yield %>
+  <body class="bg-body-tertiary">
+    <nav class="navbar navbar-expand bg-body border-bottom mb-4">
+      <div class="container">
+        <%= link_to "Linkletter", root_path, class: "navbar-brand fw-semibold" %>
+        <% if authenticated? %>
+          <div class="navbar-nav ms-auto align-items-center gap-3">
+            <span class="navbar-text small d-none d-sm-inline"><%= Current.user.email_address %></span>
+            <%= button_to "Sign out", session_path, method: :delete, class: "btn btn-sm btn-outline-secondary" %>
+          </div>
+        <% end %>
+      </div>
+    </nav>
+
+    <main class="container pb-5">
+      <% if notice.present? %><div class="alert alert-success"><%= notice %></div><% end %>
+      <% if alert.present? %><div class="alert alert-danger"><%= alert %></div><% end %>
+      <%= yield %>
+    </main>
   </body>
 </html>

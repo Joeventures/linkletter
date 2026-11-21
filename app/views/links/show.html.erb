@@ -1,0 +1,72 @@
+<% content_for :title, @link.display_title %>
+<nav class="small mb-2"><%= link_to "← #{@group.name}", @group %></nav>
+<div class="d-flex justify-content-between align-items-start mb-4 gap-2 flex-wrap">
+  <div class="text-break">
+    <h1 class="h3 mb-1"><%= @link.display_title %></h1>
+    <div class="small"><%= link_to @link.url, @link.url, target: "_blank", rel: "noopener noreferrer" %></div>
+    <div class="small text-body-secondary"><%= @link.sent_at ? "Last sent #{l(@link.sent_at, format: :long)}" : "Not sent yet" %></div>
+  </div>
+  <div class="d-flex gap-2">
+    <% if @unsent_members.any? %>
+      <%= button_to "Email #{pluralize(@unsent_members.size, "member")} who #{@unsent_members.size == 1 ? "hasn't" : "haven't"} received it",
+            deliver_group_link_path(@group, @link), class: "btn btn-primary",
+            form: { data: { turbo_confirm: "Send personal links to: #{@unsent_members.map(&:name).to_sentence}?" } } %>
+    <% end %>
+    <%= button_to "Delete", group_link_path(@group, @link), method: :delete, class: "btn btn-outline-danger",
+          form: { data: { turbo_confirm: "Delete this link? Everyone's personal link will stop working and click history will be deleted." } } %>
+  </div>
+</div>
+
+<div class="card shadow-sm mb-4">
+  <div class="card-header fw-semibold">Recipients</div>
+  <div class="table-responsive">
+    <table class="table table-sm align-middle mb-0">
+      <thead><tr><th>Member</th><th>Sent</th><th class="text-end">Clicks</th><th>First click</th><th>Last click</th><th>Personal link</th></tr></thead>
+      <tbody>
+        <% @personal_links.each do |pl| %>
+          <tr>
+            <td><%= pl.member.name %><div class="small text-body-secondary"><%= pl.member.email_address %></div></td>
+            <td class="small"><%= pl.sent_at ? l(pl.sent_at, format: :short) : "—" %></td>
+            <td class="text-end"><%= pl.clicks_count %></td>
+            <td class="small"><%= pl.first_clicked_at ? l(pl.first_clicked_at, format: :short) : "—" %></td>
+            <td class="small"><%= pl.last_clicked_at ? l(pl.last_clicked_at, format: :short) : "—" %></td>
+            <td><input type="text" readonly class="form-control form-control-sm font-monospace" value="<%= personal_redirect_url(pl.token) %>"></td>
+          </tr>
+        <% end %>
+        <% @unsent_members.each do |member| %>
+          <tr class="text-body-secondary">
+            <td><%= member.name %><div class="small"><%= member.email_address %></div></td>
+            <td colspan="5" class="small">Not sent yet</td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div class="card shadow-sm">
+  <div class="card-header fw-semibold">Click log <span class="fw-normal text-body-secondary small">(most recent <%= @clicks.size %>)</span></div>
+  <% if @clicks.any? %>
+    <div class="table-responsive">
+      <table class="table table-sm table-striped align-middle mb-0 small">
+        <thead><tr><th>When</th><th>Member</th><th>IP address</th><th>Browser</th><th>Platform</th><th>Device</th><th>Language</th><th></th></tr></thead>
+        <tbody>
+          <% @clicks.each do |click| %>
+            <tr>
+              <td class="text-nowrap"><%= l(click.created_at, format: :short) %></td>
+              <td><%= click.personal_link.member.name %></td>
+              <td class="font-monospace"><%= click.ip_address %></td>
+              <td title="<%= click.user_agent %>"><%= click.browser_summary %></td>
+              <td><%= click.platform %></td>
+              <td><%= click.device_type %></td>
+              <td class="text-truncate" style="max-width: 10rem"><%= click.accept_language %></td>
+              <td><% if click.bot %><span class="badge text-bg-warning" title="Likely an automated link scanner, not a person">bot</span><% end %></td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+  <% else %>
+    <div class="card-body text-body-secondary">No clicks yet.</div>
+  <% end %>
+</div>

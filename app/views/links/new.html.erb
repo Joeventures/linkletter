@@ -1,0 +1,22 @@
+<% content_for :title, "Add link" %>
+<nav class="small mb-2"><%= link_to "← #{@group.name}", @group %></nav>
+<h1 class="h3 mb-3">Add link to <%= @group.name %></h1>
+<div class="card shadow-sm"><div class="card-body">
+  <%= form_with model: [ @group, @link ] do |form| %>
+    <%= render "shared/errors", record: @link %>
+    <div class="mb-3">
+      <%= form.label :url, "Destination URL", class: "form-label" %>
+      <%= form.url_field :url, required: true, placeholder: "https://www.youtube.com/live/…", class: "form-control" %>
+    </div>
+    <div class="mb-3">
+      <%= form.label :title, class: "form-label" %>
+      <%= form.text_field :title, maxlength: 200, placeholder: "Used as the email subject", class: "form-control" %>
+    </div>
+    <div class="form-check mb-3">
+      <%= check_box_tag :send_now, "1", true, class: "form-check-input" %>
+      <%= label_tag :send_now, "Email each of the #{pluralize(@group.members.size, "member")} their personal link now", class: "form-check-label" %>
+    </div>
+    <%= form.submit "Save link", class: "btn btn-primary" %>
+    <%= link_to "Cancel", @group, class: "btn btn-link" %>
+  <% end %>
+</div></div>

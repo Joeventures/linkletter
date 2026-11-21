@@ -1,0 +1,23 @@
+<% content_for :title, "Groups" %>
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h1 class="h3 mb-0">Groups</h1>
+  <%= link_to "New group", new_group_path, class: "btn btn-primary" %>
+</div>
+
+<% if @groups.any? %>
+  <div class="list-group shadow-sm">
+    <% @groups.each do |group| %>
+      <%= link_to group, class: "list-group-item list-group-item-action d-flex justify-content-between align-items-center" do %>
+        <div>
+          <div class="fw-semibold"><%= group.name %></div>
+          <% if group.description.present? %><div class="small text-body-secondary"><%= truncate(group.description, length: 120) %></div><% end %>
+        </div>
+        <span class="badge text-bg-light"><%= pluralize(group.members.size, "member") %></span>
+      <% end %>
+    <% end %>
+  </div>
+<% else %>
+  <div class="text-center text-body-secondary py-5 border rounded bg-body">
+    No groups yet. Create a group, add people, then add a link to email everyone their own tracked link.
+  </div>
+<% end %>

@@ -1,0 +1,6 @@
+<p>Hi <%= @member.name %>,</p>
+<p><%= @group.name %> shared a link with you<%= ": #{@link.title}" if @link.title.present? %>.</p>
+<p>
+  <a href="<%= @url %>" style="display:inline-block;padding:12px 20px;background:#0d6efd;color:#fff;text-decoration:none;border-radius:6px;">Open link</a>
+</p>
+<p style="font-size:13px;color:#666;">This link is personal to you — please don't forward it.<br><%= @url %></p>

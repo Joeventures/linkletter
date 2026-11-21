@@ -1,0 +1,13 @@
+<%= form_with model: group do |form| %>
+  <%= render "shared/errors", record: group %>
+  <div class="mb-3">
+    <%= form.label :name, class: "form-label" %>
+    <%= form.text_field :name, required: true, maxlength: 120, class: "form-control" %>
+  </div>
+  <div class="mb-3">
+    <%= form.label :description, class: "form-label" %>
+    <%= form.text_area :description, rows: 3, class: "form-control" %>
+  </div>
+  <%= form.submit class: "btn btn-primary" %>
+  <%= link_to "Cancel", group.persisted? ? group : groups_path, class: "btn btn-link" %>
+<% end %>
