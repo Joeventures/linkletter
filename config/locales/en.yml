@@ -28,4 +28,7 @@
 #       enabled: "ON"
 
 en:
-  hello: "Hello world"
+  time:
+    formats:
+      medium: "%B %d, %Y @ %I:%M %p"
+      medium_short: "%b %d @ %I:%M %p"

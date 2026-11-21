@@ -4,7 +4,7 @@
   <div class="text-break">
     <h1 class="h3 mb-1"><%= @link.display_title %></h1>
     <div class="small"><%= link_to @link.url, @link.url, target: "_blank", rel: "noopener noreferrer" %></div>
-    <div class="small text-body-secondary"><%= @link.sent_at ? "Last sent #{l(@link.sent_at, format: :long)}" : "Not sent yet" %></div>
+    <div class="small text-body-secondary"><%= @link.sent_at ? "Last sent #{l(@link.sent_at, format: :medium)}" : "Not sent yet" %></div>
   </div>
   <div class="d-flex gap-2">
     <% if @unsent_members.any? %>
@@ -26,10 +26,10 @@
         <% @personal_links.each do |pl| %>
           <tr>
             <td><%= pl.member.name %><div class="small text-body-secondary"><%= pl.member.email_address %></div></td>
-            <td class="small"><%= pl.sent_at ? l(pl.sent_at, format: :short) : "—" %></td>
+            <td class="small"><%= pl.sent_at ? l(pl.sent_at, format: :medium_short) : "—" %></td>
             <td class="text-end"><%= pl.clicks_count %></td>
-            <td class="small"><%= pl.first_clicked_at ? l(pl.first_clicked_at, format: :short) : "—" %></td>
-            <td class="small"><%= pl.last_clicked_at ? l(pl.last_clicked_at, format: :short) : "—" %></td>
+            <td class="small"><%= pl.first_clicked_at ? l(pl.first_clicked_at, format: :medium_short) : "—" %></td>
+            <td class="small"><%= pl.last_clicked_at ? l(pl.last_clicked_at, format: :medium_short) : "—" %></td>
             <td><input type="text" readonly class="form-control form-control-sm font-monospace" value="<%= personal_redirect_url(pl.token) %>"></td>
           </tr>
         <% end %>
@@ -53,7 +53,7 @@
         <tbody>
           <% @clicks.each do |click| %>
             <tr>
-              <td class="text-nowrap"><%= l(click.created_at, format: :short) %></td>
+              <td class="text-nowrap"><%= l(click.created_at, format: :medium_short) %></td>
               <td><%= click.personal_link.member.name %></td>
               <td class="font-monospace"><%= click.ip_address %></td>
               <td title="<%= click.user_agent %>"><%= click.browser_summary %></td>
