@@ -196,3 +196,9 @@ bin/brakeman
 bin/bundler-audit
 bin/ci            # runs all of the above plus setup
 ```
+
+---
+
+## License
+
+Released under the [MIT License](LICENSE).
