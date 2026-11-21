@@ -1,0 +1,13 @@
+# Tokens are 32 base58 characters, like the ones has_secure_token generates.
+ann_stream:
+  link: stream
+  member: ann
+  token: AnnStreamToken123456789abcdefghi
+  sent_at: <%= 1.hour.ago.to_fs(:db) %>
+  clicks_count: 0
+
+mallory_link:
+  link: intruders_link
+  member: mallory
+  token: MaLLoryToken23456789abcdefghijkm
+  clicks_count: 0

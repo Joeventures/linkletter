@@ -186,16 +186,35 @@ bin/kamal deploy   # later deploys
 
 ---
 
-## Checks
+## Tests and checks
 
-The app was generated without a test framework. Run the linters and security scanners with:
+The test suite uses Minitest:
+
+```sh
+bin/rails test                               # everything
+bin/rails test test/models                   # one directory
+bin/rails test test/models/link_test.rb:12   # one test, by line number
+```
+
+| Area | Covered |
+|---|---|
+| Models (`test/models`) | URL validation (accepts http/https, rejects `javascript:`, `data:`, relative and malformed URLs), email normalization and per-group uniqueness, token format and uniqueness, members must belong to the link's group, `deliver_to_members` emails each member once, click recording (browser parsing, bot flag, totals, first/last click times, oversized and multibyte headers) |
+| Redirects (`test/controllers/redirects_controller_test.rb`) | Redirects without sign-in, records the click, privacy headers, old browsers still redirected, 404 for unknown, malformed or wrong-case tokens, redirects even if tracking fails |
+| Management (`test/controllers`) | Sign-in required, sign in/out, create/update/delete groups, members and links, bulk import formats, "send now" vs. save only, resend to new members, deleting a link disables its personal links, and **every action returns 404 for another account's records** |
+| Mailer (`test/mailers`) | Each email goes to the right person, contains their personal URL (never the raw destination), and has the right subject |
+
+Rate limiting isn't covered, because the test environment uses a null cache store.
+
+Linters and security scanners:
 
 ```sh
 bin/rubocop
 bin/brakeman
 bin/bundler-audit
-bin/ci            # runs all of the above plus setup
+bin/ci            # setup, lint, security scans and tests
 ```
+
+GitHub Actions runs the scans, lint and the test suite (against a Postgres service) on every push to `main` and on pull requests.
 
 ---
 

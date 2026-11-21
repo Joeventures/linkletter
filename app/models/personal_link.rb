@@ -10,18 +10,21 @@ class PersonalLink < ApplicationRecord
   validate :member_belongs_to_links_group
 
   def record_click!(request)
-    agent = Browser.new(request.user_agent.to_s, accept_language: request.headers["Accept-Language"].to_s)
+    # Truncate by bytes: the browser gem raises on headers over 2048 bytes.
+    user_agent = truncate_bytes(request.user_agent, 1000)
+    accept_language = truncate_bytes(request.headers["Accept-Language"], 255)
+    agent = Browser.new(user_agent, accept_language: accept_language)
 
     transaction do
       click = clicks.create!(
         ip_address: request.remote_ip,
-        user_agent: request.user_agent.to_s.first(1000),
+        user_agent: user_agent,
         browser_name: agent.name,
         browser_version: agent.full_version,
         platform: agent.platform.name,
         device_type: device_type_for(agent),
         referrer: request.referer.to_s.first(2000).presence,
-        accept_language: request.headers["Accept-Language"].to_s.first(255).presence,
+        accept_language: accept_language.presence,
         bot: agent.bot?
       )
 
@@ -35,6 +38,10 @@ class PersonalLink < ApplicationRecord
   end
 
   private
+    def truncate_bytes(value, bytes)
+      value.to_s.byteslice(0, bytes).scrub("")
+    end
+
     def device_type_for(agent)
       if agent.device.tablet? then "tablet"
       elsif agent.device.mobile? then "mobile"

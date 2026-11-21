@@ -1,0 +1,12 @@
+livestream:
+  user: owner
+  name: Livestream crew
+  description: Sunday stream viewers
+
+book_club:
+  user: owner
+  name: Book club
+
+intruders_group:
+  user: intruder
+  name: Intruder's group

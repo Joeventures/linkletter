@@ -1,0 +1,14 @@
+stream:
+  group: livestream
+  title: Live now
+  url: https://www.youtube.com/live/abc123
+  sent_at: <%= 1.hour.ago.to_fs(:db) %>
+
+unsent:
+  group: livestream
+  title: Next week
+  url: https://www.youtube.com/live/next
+
+intruders_link:
+  group: intruders_group
+  url: https://example.org/secret

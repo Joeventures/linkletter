@@ -1,0 +1,9 @@
+<% password_digest = BCrypt::Password.create("correct-horse-battery") %>
+
+owner:
+  email_address: owner@example.com
+  password_digest: <%= password_digest %>
+
+intruder:
+  email_address: intruder@example.com
+  password_digest: <%= password_digest %>

@@ -1,0 +1,19 @@
+ann:
+  group: livestream
+  name: Ann
+  email_address: ann@example.com
+
+bob:
+  group: livestream
+  name: Bob
+  email_address: bob@example.com
+
+cy:
+  group: book_club
+  name: Cy
+  email_address: cy@example.com
+
+mallory:
+  group: intruders_group
+  name: Mallory
+  email_address: mallory@example.com
