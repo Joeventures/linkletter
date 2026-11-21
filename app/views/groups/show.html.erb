@@ -7,6 +7,10 @@
   </div>
   <div class="d-flex gap-2">
     <%= link_to "Add link", new_group_link_path(@group), class: "btn btn-primary" %>
+    <%= link_to edit_group_email_template_path(@group), class: "btn btn-outline-primary" do %>
+      Email template
+      <span class="badge text-bg-light"><%= @group.email_renderer.custom_body? ? "custom" : "default" %></span>
+    <% end %>
     <%= link_to "Edit", edit_group_path(@group), class: "btn btn-outline-secondary" %>
     <%= button_to "Delete", @group, method: :delete, class: "btn btn-outline-danger",
           form: { data: { turbo_confirm: "Delete this group, its members, links, and all click history?" } } %>

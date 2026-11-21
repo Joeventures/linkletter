@@ -1,2 +1,11 @@
 @import 'bootstrap/scss/bootstrap';
 @import 'bootstrap-icons/font/bootstrap-icons';
+
+// Email template editor: emails can't carry Active Storage attachments.
+.email-template-editor .trix-button-group--file-tools {
+  display: none;
+}
+
+.email-template-editor trix-editor {
+  min-height: 18rem;
+}

@@ -23,4 +23,16 @@ class LinkMailerTest < ActionMailer::TestCase
     email = LinkMailer.with(personal_link: personal_links(:ann_stream)).personal_link
     assert_equal "A new link from Livestream crew", email.subject
   end
+
+  test "uses the group's custom template and subject" do
+    group = groups(:livestream)
+    group.update!(email_subject: "{{first_name}}, we're live", email_template: %(<div>Hey {{first_name}}, <a href="{{link}}">tap here</a>.</div>))
+    personal_link = personal_links(:ann_stream)
+    email = LinkMailer.with(personal_link: personal_link).personal_link
+    url = "http://example.com/l/#{personal_link.token}"
+
+    assert_equal "Ann, we're live", email.subject
+    assert_includes email.html_part.body.to_s, %(<a href="#{url}">tap here</a>)
+    assert_includes email.text_part.body.to_s, "Hey Ann, tap here (#{url})."
+  end
 end

@@ -6,6 +6,7 @@ Rails.application.routes.draw do
     resources :members, only: %i[ create edit update destroy ] do
       post :import, on: :collection
     end
+    resource :email_template, only: %i[ show edit update destroy ]
     resources :links, only: %i[ new create show destroy ] do
       post :deliver, on: :member
     end

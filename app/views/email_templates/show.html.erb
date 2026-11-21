@@ -1,0 +1,22 @@
+<% content_for :title, "Email preview · #{@group.name}" %>
+<nav class="small mb-2"><%= link_to "← #{@group.name}", @group %></nav>
+<div class="d-flex justify-content-between align-items-start mb-3 gap-2 flex-wrap">
+  <div>
+    <h1 class="h3 mb-1">Email preview</h1>
+    <p class="text-body-secondary mb-0">
+      <%= @group.email_renderer.custom_body? ? "Custom template" : "Default email" %> ·
+      shown with sample details. Each member's real email uses their own name and personal link.
+    </p>
+  </div>
+  <%= link_to "Edit template", edit_group_email_template_path(@group), class: "btn btn-primary" %>
+</div>
+
+<div class="card shadow-sm mb-4">
+  <div class="card-header"><span class="text-body-secondary">Subject:</span> <strong><%= @email.subject %></strong></div>
+  <div class="card-body email-preview"><%= @email.html %></div>
+</div>
+
+<details>
+  <summary class="small">Plain-text version</summary>
+  <pre class="mt-2 p-3 bg-body border rounded small" style="white-space: pre-wrap"><%= @email.text %></pre>
+</details>

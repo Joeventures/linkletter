@@ -32,6 +32,26 @@ Group ──< Member
 3. **A member clicks their link.** `RedirectsController` looks up the token, records a `Click`, updates the personal link's click totals and first/last click times, then sends a `302` redirect to the destination.
 4. **View the results** on the link's page: who it was sent to, how many times each person clicked, first and last click, and the full click log.
 
+### Email templates
+
+Each group has an email template, edited with Action Text's rich-text editor (Trix) at **Group → Email template**. Until you customize it, members get a built-in default email.
+
+Every member must receive their **own** tracked link, so you don't paste a URL into the template. You add a placeholder, and Linkletter swaps in each person's link when it sends. There are three ways to add the link, and the editor has a button and on-screen instructions for each:
+
+| How | What the member sees |
+|---|---|
+| **Insert link button** (adds `{{link}}`) | An "Open link" button |
+| **Link selected text** (highlight words, then click) | Your own words, linked |
+| **Insert web address** (adds `{{link_url}}`) | The full personal URL |
+
+Other placeholders: `{{first_name}}`, `{{name}}`, `{{title}}` (the link's title, or "a link"), `{{group}}`. Spaces inside the braces are allowed, and unknown placeholders are left as typed.
+
+- **Subject:** optional. It defaults to the link's title and can use the same placeholders except the link ones.
+- **The link is required:** a template without the personal link can't be saved. This stops untracked emails from going out.
+- **Plain-text version:** generated automatically. Linked text becomes `words (URL)` there.
+- **Preview** shows the subject, HTML and plain-text versions with sample details. **Reset to the default email** discards the template.
+- **No images or attachments:** they're disabled in the editor, because emails can't carry Active Storage files.
+
 ### Members added later
 
 If you add members after a link was sent, the link's page lists them as "Not sent yet" and shows an **Email N members who haven't received it** button. Sending is idempotent: members who already have a personal link for that link are never emailed twice.
@@ -47,6 +67,7 @@ If you add members after a link was sent, the link's page lists them as "Not sen
   - Invalid lines and duplicates are skipped and reported
 - Links: any `http://` or `https://` URL with an optional title, which becomes the email subject
 - Personal emails (HTML and plain text), sent in the background via Active Job
+- Per-group email templates built with Action Text, with placeholders, link-insertion buttons, preview, and reset to default (see [Email templates](#email-templates))
 - Click tracking per person:
   - timestamp
   - IP address
@@ -70,6 +91,7 @@ If you add members after a link was sent, the link's page lists them as "Not sen
 | **Open sign-up** | There is no registration page. Accounts are created from the command line (see below). |
 | **Token leaking to the destination** | Redirects send `Referrer-Policy: no-referrer`, so the destination site (e.g. YouTube) never sees the personal URL. |
 | **Caching or indexing** | Redirects send `Cache-Control: no-store` and `X-Robots-Tag: noindex, nofollow`. |
+| **Template injection** | Templates are sanitized by Action Text before placeholders are filled in, and every substituted value (member name, title, group name) is HTML-escaped. `javascript:` links, scripts and event handlers are stripped. |
 | **Weak passwords** | Minimum 12 characters. Passwords are stored with bcrypt. |
 | **CSRF / sessions** | Standard Rails CSRF protection. Session cookies are signed, `httponly` and `SameSite=Lax`. Production forces HTTPS: secure-only cookies, HSTS, and HTTP→HTTPS redirects. |
 
@@ -171,6 +193,9 @@ bin/kamal deploy   # later deploys
 | `app/controllers/concerns/group_scoped.rb` | Scopes nested resources to the signed-in user's groups |
 | `app/controllers/{groups,members,links}_controller.rb` | Management UI |
 | `app/mailers/link_mailer.rb`, `app/views/link_mailer/` | The personal-link email |
+| `app/models/email_template.rb` | Renders a group's template (or the default) for one member: placeholders, HTML and plain text |
+| `app/controllers/email_templates_controller.rb`, `app/views/email_templates/` | Template editor, preview, reset |
+| `app/javascript/controllers/email_template_controller.js` | Editor buttons: insert placeholders, link selected text, block attachments |
 | `lib/tasks/users.rake` | `users:create` task |
 
 ### Routes
@@ -181,6 +206,7 @@ bin/kamal deploy   # later deploys
 | `/groups` (and nested `/groups/:id/members`, `/groups/:id/links`) | Management UI (sign-in required) |
 | `POST /groups/:group_id/members/import` | Bulk member import |
 | `POST /groups/:group_id/links/:id/deliver` | Email members who haven't received the link yet |
+| `GET/PATCH/DELETE /groups/:group_id/email_template` (+ `/edit`) | Preview, save, and reset the group's email template |
 | `/session`, `/passwords` | Sign in/out and password reset |
 | `GET /up` | Health check |
 
@@ -201,6 +227,7 @@ bin/rails test test/models/link_test.rb:12   # one test, by line number
 | Models (`test/models`) | URL validation (accepts http/https, rejects `javascript:`, `data:`, relative and malformed URLs), email normalization and per-group uniqueness, token format and uniqueness, members must belong to the link's group, `deliver_to_members` emails each member once, click recording (browser parsing, bot flag, totals, first/last click times, oversized and multibyte headers) |
 | Redirects (`test/controllers/redirects_controller_test.rb`) | Redirects without sign-in, records the click, privacy headers, old browsers still redirected, 404 for unknown, malformed or wrong-case tokens, redirects even if tracking fails |
 | Management (`test/controllers`) | Sign-in required, sign in/out, create/update/delete groups, members and links, bulk import formats, "send now" vs. save only, resend to new members, deleting a link disables its personal links, and **every action returns 404 for another account's records** |
+| Email templates (`test/models/email_template_test.rb`, `test/controllers/email_templates_controller_test.rb`) | Default and custom rendering, every placeholder, linked text, HTML escaping, sanitization, plain-text output, link required, preview/reset, cross-account 404s |
 | Mailer (`test/mailers`) | Each email goes to the right person, contains their personal URL (never the raw destination), and has the right subject |
 
 Rate limiting isn't covered, because the test environment uses a null cache store.

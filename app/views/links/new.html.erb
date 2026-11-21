@@ -15,6 +15,11 @@
     <div class="form-check mb-3">
       <%= check_box_tag :send_now, "1", true, class: "form-check-input" %>
       <%= label_tag :send_now, "Email each of the #{pluralize(@group.members.size, "member")} their personal link now", class: "form-check-label" %>
+      <div class="form-text">
+        Uses the group's <%= @group.email_renderer.custom_body? ? "custom" : "default" %> email.
+        <%= link_to "Preview", group_email_template_path(@group), target: "_blank" %> ·
+        <%= link_to "Edit template", edit_group_email_template_path(@group), target: "_blank" %>
+      </div>
     </div>
     <%= form.submit "Save link", class: "btn btn-primary" %>
     <%= link_to "Cancel", @group, class: "btn btn-link" %>

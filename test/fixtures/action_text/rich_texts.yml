@@ -1,0 +1,4 @@
+book_club_email_template:
+  record: book_club (Group)
+  name: email_template
+  body: <div>Hello {{first_name}}! Members of {{group}} can <a href="{{link}}">join the call here</a>.</div>

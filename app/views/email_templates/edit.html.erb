@@ -1,0 +1,88 @@
+<% content_for :title, "Email template · #{@group.name}" %>
+<nav class="small mb-2"><%= link_to "← #{@group.name}", @group %></nav>
+<h1 class="h3 mb-1">Email template</h1>
+<p class="text-body-secondary">This is the email every member of <strong><%= @group.name %></strong> receives when you send them a link.</p>
+
+<div class="row g-4" data-controller="email-template">
+  <div class="col-lg-8">
+    <%= form_with model: @group, url: group_email_template_path(@group), method: :patch, class: "card shadow-sm" do |form| %>
+      <div class="card-body">
+        <%= render "shared/errors", record: @group %>
+
+        <div class="mb-3">
+          <%= form.label :email_subject, "Subject", class: "form-label fw-semibold" %>
+          <%= form.text_field :email_subject, maxlength: 200, class: "form-control", placeholder: "{{title}}" %>
+          <div class="form-text">Leave blank to use the link's title. You can use <code>{{title}}</code>, <code>{{group}}</code>, <code>{{first_name}}</code> and <code>{{name}}</code>.</div>
+        </div>
+
+        <%= form.label :email_template, "Message", class: "form-label fw-semibold" %>
+        <div class="d-flex flex-wrap gap-2 mb-2" role="toolbar" aria-label="Insert personal link">
+          <button type="button" class="btn btn-sm btn-primary"
+                  data-action="mousedown->email-template#keepFocus click->email-template#insert"
+                  data-email-template-placeholder-param="link">
+            <i class="bi bi-link-45deg"></i> Insert link button
+          </button>
+          <button type="button" class="btn btn-sm btn-outline-primary"
+                  data-action="mousedown->email-template#keepFocus click->email-template#linkSelection">
+            <i class="bi bi-cursor-text"></i> Link selected text
+          </button>
+          <button type="button" class="btn btn-sm btn-outline-primary"
+                  data-action="mousedown->email-template#keepFocus click->email-template#insert"
+                  data-email-template-placeholder-param="link_url">
+            Insert web address
+          </button>
+          <div class="vr d-none d-sm-block"></div>
+          <% %w[first_name name title group].each do |key| %>
+            <button type="button" class="btn btn-sm btn-outline-secondary font-monospace"
+                    data-action="mousedown->email-template#keepFocus click->email-template#insert"
+                    data-email-template-placeholder-param="<%= key %>"
+                    title="<%= EmailTemplate::PLACEHOLDERS[key] %>">{{<%= key %>}}</button>
+          <% end %>
+        </div>
+        <div class="email-template-editor">
+          <%= form.rich_text_area :email_template, data: { email_template_target: "editor" }, class: "form-control bg-body" %>
+        </div>
+        <div class="form-text text-primary" data-email-template-target="message" aria-live="polite"></div>
+      </div>
+      <div class="card-footer d-flex gap-2 flex-wrap">
+        <%= form.submit "Save and preview", class: "btn btn-primary" %>
+        <%= link_to "Cancel", @group, class: "btn btn-link" %>
+      </div>
+    <% end %>
+
+    <% if @group.email_renderer.custom_body? || @group.email_subject.present? %>
+      <%= button_to "Reset to the default email", group_email_template_path(@group), method: :delete,
+            class: "btn btn-sm btn-link text-danger mt-2 px-0",
+            form: { data: { turbo_confirm: "Discard this template and go back to the default email?" } } %>
+    <% end %>
+  </div>
+
+  <div class="col-lg-4">
+    <div class="card shadow-sm border-primary-subtle position-sticky" style="top: 1rem">
+      <div class="card-header fw-semibold bg-primary-subtle">How to add the personal link</div>
+      <div class="card-body small">
+        <p>Every member gets their <strong>own</strong> tracked link. You don't paste it in — you add a placeholder, and Linkletter swaps in each person's link when it sends. <strong>The message must include the link at least once.</strong></p>
+
+        <p class="fw-semibold mb-1">Choose one (or more) of these:</p>
+        <ol class="ps-3">
+          <li class="mb-2"><strong>As a button.</strong> Click in the message where the button should go, then click <em>Insert link button</em>. This adds <code>{{link}}</code>, which becomes an <span class="badge text-bg-primary">Open link</span> button.</li>
+          <li class="mb-2"><strong>On your own words.</strong> Highlight text such as “watch the livestream”, then click <em>Link selected text</em>. Those words become the link.</li>
+          <li class="mb-2"><strong>As a web address.</strong> Click <em>Insert web address</em> to add <code>{{link_url}}</code>, which shows the full personal link.</li>
+        </ol>
+
+        <div class="alert alert-warning py-2 px-3 mb-3">
+          <strong>Don't paste the destination (e.g. the YouTube URL) into the message.</strong> A direct link skips Linkletter, so the click isn't tracked. Add the destination when you create the link instead.
+        </div>
+
+        <p class="fw-semibold mb-1">Other placeholders</p>
+        <dl class="row mb-2">
+          <% EmailTemplate::PLACEHOLDERS.except("link", "link_url").each do |key, description| %>
+            <dt class="col-5 font-monospace fw-normal">{{<%= key %>}}</dt>
+            <dd class="col-7 mb-1"><%= description %></dd>
+          <% end %>
+        </dl>
+        <p class="text-body-secondary mb-0">You can also type placeholders yourself. Images and attachments aren't supported in emails.</p>
+      </div>
+    </div>
+  </div>
+</div>
