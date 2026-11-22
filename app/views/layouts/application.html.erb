@@ -29,6 +29,9 @@
         <%= link_to "Linkletter", root_path, class: "navbar-brand fw-semibold" %>
         <% if authenticated? %>
           <div class="navbar-nav ms-auto align-items-center gap-3">
+            <% if Rails.env.development? %>
+              <%= link_to "Sent mail", "/letter_opener", class: "nav-link", target: "_blank", title: "Emails caught by letter_opener_web (development only)" %>
+            <% end %>
             <span class="navbar-text small d-none d-sm-inline"><%= Current.user.email_address %></span>
             <%= button_to "Sign out", session_path, method: :delete, class: "btn btn-sm btn-outline-secondary" %>
           </div>

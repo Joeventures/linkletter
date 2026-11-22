@@ -122,11 +122,13 @@ bin/rails users:create EMAIL=you@example.com  # prompts for a password (12+ char
 bin/dev                                       # Rails server + CSS watcher
 ```
 
-Open http://localhost:3000 and sign in.
+Open http://localhost:3000 and sign in. Emails sent in development appear at http://localhost:3000/letter_opener.
 
 In development:
 
-- Emails are not actually sent. Each email, including its personal link, is written to `log/development.log`.
+- **Email is caught by [letter_opener_web](https://github.com/fgrehm/letter_opener_web)** and never sent. Browse it at http://localhost:3000/letter_opener, where you can open each email, switch between the HTML and plain-text versions, and click the personal links (which hit your local app, so clicks are tracked).
+- It's a development-only gem in the `Gemfile`, so there's nothing extra to install or run. Caught emails are saved in `tmp/letter_opener/` and can be cleared from the inbox page.
+- The `/letter_opener` route is only mounted in development. It isn't installed or routed in test or production.
 - Jobs run in-process with the `:async` adapter.
 
 > **Postgres.app on macOS:** Postgres.app asks for permission the first time a new process connects. Avoid `rails server -d` (daemon mode). The detached process can't show the prompt and requests will hang. Run the server in the foreground with `bin/dev`.
