@@ -39,7 +39,9 @@ registry:
 # Inject ENV variables into containers (secrets come from .kamal/secrets).
 env:
   secret:
-    - RAILS_MASTER_KEY
+    - SECRET_KEY_BASE
+    - SMTP_USERNAME
+    - SMTP_PASSWORD
   clear:
     # Run the Solid Queue Supervisor inside the web server's Puma process to do jobs.
     # When you start using multiple servers, you should split out job processing to a dedicated machine.
@@ -47,6 +49,13 @@ env:
 
     # Domain used to build the personal links in emails (keep in sync with proxy.host).
     APP_HOST: links.example.com
+
+    # Sender address for link emails.
+    MAIL_FROM: "Linkletter <links@example.com>"
+
+    # Your email provider's SMTP server (username/password are secrets above).
+    SMTP_ADDRESS: smtp.example.com
+    SMTP_PORT: 587
 
     # Set number of processes dedicated to Solid Queue (default: 1)
     # JOB_CONCURRENCY: 3
@@ -91,7 +100,7 @@ builder:
   #   RUBY_VERSION: ruby-4.0.10
   # secrets:
   #   - GITHUB_TOKEN
-  #   - RAILS_MASTER_KEY
+  #   - SECRET_KEY_BASE
 
 # Use a different ssh user than root
 # ssh:
