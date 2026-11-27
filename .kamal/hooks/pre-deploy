@@ -10,10 +10,9 @@
 # Keep this list in sync with env.secret in config/deploy.yml.
 
 missing=""
-for name in SECRET_KEY_BASE SMTP_USERNAME SMTP_PASSWORD; do
-  eval "value=\${$name}"
-  [ -n "$value" ] || missing="$missing $name"
-done
+[ -n "$SECRET_KEY_BASE" ] || missing="$missing SECRET_KEY_BASE"
+[ -n "$SMTP_USERNAME" ] || missing="$missing SMTP_USERNAME"
+[ -n "$SMTP_PASSWORD" ] || missing="$missing SMTP_PASSWORD"
 
 if [ -n "$missing" ]; then
   echo "Missing required secrets:$missing" >&2

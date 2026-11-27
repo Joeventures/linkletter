@@ -62,14 +62,25 @@ Rails.application.configure do
   config.action_mailer.default_url_options = { host: ENV.fetch("APP_HOST", "example.com"), protocol: "https" }
 
   # Outgoing SMTP server, configured entirely from environment variables (no Rails credentials).
+  # Invalid values raise at boot, so a bad deploy fails its health check instead of failing to send mail.
   if ENV["SMTP_ADDRESS"].present?
+    smtp_port = Integer(ENV.fetch("SMTP_PORT", "587"), 10, exception: false)
+    unless smtp_port&.between?(1, 65_535)
+      raise ArgumentError, "SMTP_PORT must be a port number (1-65535), got #{ENV["SMTP_PORT"].inspect}"
+    end
+
+    smtp_authentication = ENV.fetch("SMTP_AUTHENTICATION", "plain")
+    unless %w[plain login cram_md5].include?(smtp_authentication)
+      raise ArgumentError, "SMTP_AUTHENTICATION must be plain, login or cram_md5, got #{smtp_authentication.inspect}"
+    end
+
     config.action_mailer.delivery_method = :smtp
     config.action_mailer.smtp_settings = {
       address: ENV["SMTP_ADDRESS"],
-      port: ENV.fetch("SMTP_PORT", 587).to_i,
+      port: smtp_port,
       user_name: ENV["SMTP_USERNAME"],
       password: ENV["SMTP_PASSWORD"],
-      authentication: ENV.fetch("SMTP_AUTHENTICATION", "plain").to_sym,
+      authentication: smtp_authentication.to_sym,
       enable_starttls_auto: true
     }.compact
   end
