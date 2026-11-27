@@ -163,6 +163,7 @@ This project does **not** use Rails encrypted credentials (`config/credentials.y
 
 - **Development:** `.env` (see above).
 - **Production:** Kamal injects variables into the container. Plain values go under `env.clear` in `config/deploy.yml`. Secrets are listed under `env.secret` and their values are read by `.kamal/secrets` from your shell when you run `bin/kamal`, so export `SECRET_KEY_BASE`, `SMTP_USERNAME` and `SMTP_PASSWORD` first (or change `.kamal/secrets` to fetch them from a password manager).
+- A `.kamal/hooks/pre-deploy` hook stops any deploy, redeploy or rollback if one of those secrets is blank, so a forgotten `export` can't ship an empty `SECRET_KEY_BASE` or SMTP password.
 
 ### HTTPS and other hosting setups
 

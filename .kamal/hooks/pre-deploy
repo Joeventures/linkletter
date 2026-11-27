@@ -1,0 +1,23 @@
+#!/bin/sh
+
+# Stop a deploy, redeploy or rollback if a required secret is blank.
+#
+# .kamal/secrets reads secrets from your shell (e.g. SECRET_KEY_BASE=$SECRET_KEY_BASE), and an
+# unset variable there silently becomes an empty string. Kamal ignores the exit status of
+# commands in that file, so the check lives here instead: Kamal runs this hook with the
+# resolved secrets in its environment, before any new container boots.
+#
+# Keep this list in sync with env.secret in config/deploy.yml.
+
+missing=""
+for name in SECRET_KEY_BASE SMTP_USERNAME SMTP_PASSWORD; do
+  eval "value=\${$name}"
+  [ -n "$value" ] || missing="$missing $name"
+done
+
+if [ -n "$missing" ]; then
+  echo "Missing required secrets:$missing" >&2
+  echo "Export them in your shell before running kamal (see .kamal/secrets)." >&2
+  echo "Generate SECRET_KEY_BASE with: bin/rails secret" >&2
+  exit 1
+fi
