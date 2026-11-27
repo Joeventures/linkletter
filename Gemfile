@@ -59,6 +59,9 @@ group :development do
 
   # Catch outgoing email and browse it at /letter_opener [https://github.com/fgrehm/letter_opener_web]
   gem "letter_opener_web", "~> 3.0"
+
+  # Load environment variables from .env in development [https://github.com/bkeepers/dotenv]
+  gem "dotenv", "~> 3.2"
 end
 
 gem "browser", ">= 6.2"

@@ -117,6 +117,7 @@ Many corporate email systems (e.g. Microsoft Defender Safe Links, Mimecast) auto
 ### Install and run
 
 ```sh
+cp .env.example .env                          # optional: local environment variables
 bin/setup --skip-server                       # bundle, yarn install, create and migrate the database
 bin/rails users:create EMAIL=you@example.com  # prompts for a password (12+ characters)
 bin/dev                                       # Rails server + CSS watcher
@@ -126,6 +127,7 @@ Open http://localhost:3000 and sign in. Emails sent in development appear at htt
 
 In development:
 
+- **Environment variables** are loaded from `.env` if it exists, using the [dotenv](https://github.com/bkeepers/dotenv) gem (development only). Copy `.env.example`, which lists every variable the app reads. Variables already set in your shell win. `.env` is gitignored; `.env.example` is committed. Nothing in development requires a variable.
 - **Email is caught by [letter_opener_web](https://github.com/fgrehm/letter_opener_web)** and never sent. Browse it at http://localhost:3000/letter_opener, where you can open each email, switch between the HTML and plain-text versions, and click the personal links (which hit your local app, so clicks are tracked).
 - It's a development-only gem in the `Gemfile`, so there's nothing extra to install or run. Caught emails are saved in `tmp/letter_opener/` and can be cleared from the inbox page.
 - The `/letter_opener` route is only mounted in development. It isn't installed or routed in test or production.
@@ -147,12 +149,21 @@ bin/rails users:create EMAIL=someone@example.com
 |---|---|---|
 | `MAIL_FROM` | env var | Sender address, e.g. `Linkletter <links@yourdomain.com>`. Defaults to `no-reply@example.com`. |
 | `APP_HOST` | env var (set in `config/deploy.yml`) | **Required.** The domain used to build the `https://` personal URLs in emails. Use a short domain, since it appears in every link. Keep it the same as `proxy.host`. |
-| SMTP | `config/environments/production.rb` → `config.action_mailer.smtp_settings` | Credentials for your email provider (Postmark, SES, SendGrid, etc.), ideally stored in `bin/rails credentials:edit`. |
-| `RAILS_MASTER_KEY` | env var | Decrypts `config/credentials.yml.enc`. |
+| `SECRET_KEY_BASE` | secret env var (`.kamal/secrets`) | **Required.** Signs sessions and cookies. Generate once with `bin/rails secret` and keep it stable; changing it signs everyone out. |
+| `SMTP_ADDRESS`, `SMTP_PORT` | env var (set in `config/deploy.yml`) | Your email provider's SMTP server. SMTP delivery is enabled when `SMTP_ADDRESS` is set. `SMTP_AUTHENTICATION` defaults to `plain`. |
+| `SMTP_USERNAME`, `SMTP_PASSWORD` | secret env vars (`.kamal/secrets`) | Your email provider's SMTP login. |
 | Database | `config/database.yml` / `DATABASE_URL` | PostgreSQL. Production also uses the Solid Cache, Solid Queue and Solid Cable databases. |
 | Background jobs | `SOLID_QUEUE_IN_PUMA=true` or a separate `bin/jobs` process | Emails are delivered by Solid Queue in production. |
 | SSL | `config/deploy.yml` → `proxy` | `assume_ssl` and `force_ssl` are on in `production.rb`. kamal-proxy terminates SSL with an automatic Let's Encrypt certificate for `proxy.host`. Set it to your real domain and point DNS at the server before deploying. `/up` is exempt from the HTTPS redirect for health checks. |
 | Hosts | `config.hosts` in `production.rb` | Recommended: restrict to your domain. |
+
+### Secrets and environment variables
+
+This project does **not** use Rails encrypted credentials (`config/credentials.yml.enc`); all configuration and secrets come from environment variables.
+
+- **Development:** `.env` (see above).
+- **Production:** Kamal injects variables into the container. Plain values go under `env.clear` in `config/deploy.yml`. Secrets are listed under `env.secret` and their values are read by `.kamal/secrets` from your shell when you run `bin/kamal`, so export `SECRET_KEY_BASE`, `SMTP_USERNAME` and `SMTP_PASSWORD` first (or change `.kamal/secrets` to fetch them from a password manager).
+- A `.kamal/hooks/pre-deploy` hook stops any deploy, redeploy or rollback if one of those secrets is blank, so a forgotten `export` can't ship an empty `SECRET_KEY_BASE` or SMTP password.
 
 ### HTTPS and other hosting setups
 

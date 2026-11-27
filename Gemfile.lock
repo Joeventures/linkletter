@@ -395,6 +395,7 @@ DEPENDENCIES
   bundler-audit
   cssbundling-rails
   debug
+  dotenv (~> 3.2)
   importmap-rails
   jbuilder
   kamal
